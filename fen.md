@@ -33,24 +33,33 @@ make package FINALPACKAGE=1 PACKAGE_FORMAT=ipa  # .ipa
 
 ## Kaldığımız yer
 - **Uygulama henüz hiçbir cihazda test edilmedi.**
-- iPhone 8 (`192.168.0.20`) **jailbreak'siz**. Ağda görünüyor ama SSH kapalı, yani ağ üzerinden yükleme yapılamıyor.
+- Test cihazı iPhone 8 değil, **iPhone SE 2 (A13), iOS 26.5.2**, jailbreak'siz (IP `192.168.0.20`, SSH kapalı).
+  - ARKit tam destekli; ekran iPhone 8 ile aynı (4,7"). Mevcut `.ipa` yeniden derlenmeden kullanılabilir.
+  - iOS 26 için **TrollStore ve jailbreak yok**. Tek yol **Sideloadly** (Apple ID ile imzalama).
+- Windows'a Sideloadly kuruldu. İlk denemede hata alındı:
+  `Login failed (-80046): This action cannot be completed at this time.`
+  Bu hata Apple ID girişinden kaynaklanıyor; uygulamayla ilgisi yok.
 - iPhone 6s (jailbreak'li, rootless, eski IP `192.168.1.7`) şu an ağda bulunamadı.
 
 ## Sıradaki adımlar
-1. iPhone 8'in iOS sürümünü öğren (*Ayarlar → Genel → Hakkında*).
-   - **iOS 14.0 – 16.6.1:** TrollStore (TrollInstallerX) ile `.ipa` dosyasını süresiz kur.
-   - **Diğer sürümler:** Windows'ta Sideloadly + iTunes ile Apple ID kullanarak kur.
-     - Ücretsiz hesapta uygulama 7 günde bir yeniden yüklenmeli.
-     - Telefonda *VPN ve Cihaz Yönetimi*'nden sertifikaya güven.
-     - iOS 16 ve üstünde *Geliştirici Modu*'nu aç.
-2. İstersen önce 6s'te dene: IP'sini bul, sonra:
+1. Sideloadly -80046 hatasını çöz:
+   - iPhone SE'de *Ayarlar → en üstteki ad* bölümünde Apple ID e-postasını bul.
+   - **developer.apple.com/account** adresinde bu hesapla giriş yap, şartları kabul et.
+   - Olmazsa Sideloadly'de *Advanced options → Anisette Authentication* ayarını değiştir.
+   - Sideloadly'nin son sürüm olduğundan emin ol (iOS 26 desteği için).
+   - Yeni Apple ID'lerde ya da çok denemeden sonra Apple geçici engelleyebilir; birkaç saat bekle ya da başka bir Apple ID dene.
+2. Kurulum sonrası iPhone'da:
+   - *Ayarlar → Genel → VPN ve Cihaz Yönetimi*'nden sertifikaya güven.
+   - *Ayarlar → Gizlilik ve Güvenlik → Geliştirici Modu*'nu aç.
+   - Ücretsiz hesapta uygulama 7 günde bir Sideloadly ile yeniden yüklenmeli.
+3. İstersen önce 6s'te dene: IP'sini bul, sonra:
    ```bash
    scp packages/com.olap.dunyakatmanlariar_0.1.0_iphoneos-arm64.deb root@<IP>:/var/mobile/
    ssh root@<IP> "dpkg -i /var/mobile/com.olap.dunyakatmanlariar_0.1.0_iphoneos-arm64.deb && uicache -a"
    ```
-3. Kitabın 18. sayfasıyla test et (iyi ışık, 15–25 cm mesafe). Şunları kontrol et:
+4. Kitabın 18. sayfasıyla test et (iyi ışık, 15–25 cm mesafe). Şunları kontrol et:
    - Görsel algılanıyor mu?
    - Model boyutu uygun mu?
    - Etiketler okunuyor mu?
    - Katmana dokununca bilgi çıkıyor mu?
-4. Test sonucuna göre gerekirse ayarla: `kModelRadiusMeters` (model boyutu), renkler, etiket yerleri, açıklama metinleri.
+5. Test sonucuna göre gerekirse ayarla: `kModelRadiusMeters` (model boyutu), renkler, etiket yerleri, açıklama metinleri.

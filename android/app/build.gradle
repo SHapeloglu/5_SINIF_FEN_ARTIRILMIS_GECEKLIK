@@ -1,0 +1,38 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.olap.dunyakatmanlariar'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.olap.dunyakatmanlariar'
+        // ARCore en az Android 7.0 (API 24) ister.
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '0.1.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Magaza disi dagitim icin release de debug anahtariyla imzalanir.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation 'com.google.ar:core:1.44.0'
+}

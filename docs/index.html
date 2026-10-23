@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#0b1530">
+  <title>Fen AR 5. Sınıf</title>
+  <meta name="description" content="5. sınıf Fen kitabındaki işaretli görsellerin üzerinde artırılmış gerçeklik ile 3D animasyonlar.">
+  <style>
+    :root {
+      --bg: #0b1530;
+      --panel: rgba(255, 255, 255, 0.95);
+      --ink: #1f1f1f;
+      --accent: #f28c1f;
+      --accent-ink: #d9660d;
+      --hint-bg: rgba(0, 0, 0, 0.55);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%; overflow: hidden;
+      background: var(--bg); color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-user-select: none; user-select: none; touch-action: none;
+    }
+    #ar { position: fixed; inset: 0; }
+    #hint {
+      position: fixed; top: max(16px, env(safe-area-inset-top)); left: 16px; right: 64px; z-index: 5;
+      padding: 10px 12px; border-radius: 12px; background: var(--hint-bg);
+      font-weight: 700; font-size: 14px; text-align: center; display: none;
+    }
+    #back {
+      position: fixed; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 6; display: none;
+      width: 40px; height: 40px; border-radius: 12px; border: 0; background: var(--hint-bg); color: #fff;
+      font-size: 20px; cursor: pointer;
+    }
+    #info {
+      position: fixed; left: 12px; right: 12px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 5;
+      padding: 12px 40px 14px 16px; border-radius: 16px; background: var(--panel); color: var(--ink);
+      display: none; transition: opacity .2s; max-height: 40vh; overflow: auto;
+    }
+    #info h2 { margin: 0 0 4px; font-size: 19px; color: var(--accent-ink); }
+    #info p { margin: 0; font-size: 15px; line-height: 1.4; }
+    #info .close {
+      position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; border: 0; border-radius: 10px;
+      background: transparent; color: #666; font-size: 20px; cursor: pointer;
+    }
+    #start {
+      position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px; padding: 24px 16px; text-align: center;
+      background: radial-gradient(circle at 50% 35%, #1d3b7a 0%, var(--bg) 70%); overflow: auto;
+    }
+    #start img { width: min(36vw, 150px); height: auto; border-radius: 50%; }
+    #start h1 { margin: 0; font-size: 24px; }
+    #start p { margin: 0; max-width: 440px; font-size: 15px; line-height: 1.45; opacity: .9; }
+    #units { display: flex; flex-direction: column; gap: 10px; width: min(100%, 420px); }
+    #units button {
+      font: inherit; font-size: 16px; font-weight: 700; color: #fff; background: var(--accent);
+      border: 0; border-radius: 14px; padding: 14px 18px; cursor: pointer; text-align: left;
+    }
+    #units button.pre { outline: 3px solid #fff; }
+    #units button:disabled { opacity: .6; }
+    #err { color: #ffd29a; font-size: 14px; max-width: 420px; min-height: 1em; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="ar"></div>
+  <div id="hint"></div>
+  <button id="back" aria-label="Ünite seçimine dön">⟲</button>
+  <div id="info"><button class="close" aria-label="Kapat">×</button><h2></h2><p></p></div>
+
+  <div id="start">
+    <img src="hedef.png" alt="Kitaptaki Dünya görseli">
+    <h1>Fen Bilimleri 5 • AR</h1>
+    <p>Bir ünite seçin, kamerayı açın ve kitapta <b>kırmızı ile işaretli</b> görsellerden birini kameraya gösterin. Görselin üzerinde 3D animasyon belirecek.</p>
+    <div id="units"></div>
+    <div id="err"></div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

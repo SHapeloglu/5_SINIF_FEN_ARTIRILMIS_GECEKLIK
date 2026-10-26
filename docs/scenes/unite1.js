@@ -152,6 +152,33 @@ export default [
     },
   },
 
+  // #6 s.29 Ay'in donme ve dolanma hareketi (Gorsel 1.2.1)
+  {
+    mark: 6, page: 29, title: "Ay'ın Dönme ve Dolanma Hareketi",
+    info: "Ay, dönme ve dolanma hareketleri yapan bir gök cismidir. Ay, Dünya'nın etrafında dolanırken kendi ekseni etrafında da döner. Bu hareketlerin ikisi de saatin dönme yönünün tersine gerçekleşir.",
+    build() {
+      const root = new THREE.Group();
+      const earth = info(planet('earth', 0.09), 'Dünya', 'Kendi ekseni etrafında döner. Ay, Dünya’nın etrafında dolanır.');
+      earth.position.y = 0.1; root.add(earth);
+      const eSpin = spinArrow(0.13, 0x80deea); eSpin.position.set(0, 0.26, 0); root.add(eSpin);
+      const path = orbit(0.38, 0xffb300, true, 0.17); path.position.y = 0.1; root.add(path);
+      const moon = info(planet('moon', 0.03), 'Ay', "Dünya'nın etrafında dolanır (dolanma hareketi) ve kendi ekseni etrafında döner (dönme hareketi). Her ikisi de saatin dönme yönünün tersinedir.");
+      const mSpin = spinArrow(0.055, 0xffe082); root.add(moon, mSpin);
+      const l1 = label('Dönme', { height: 0.04 }), l2 = label('Dolanma', { height: 0.04 });
+      l1.position.set(0, 0.36, 0); l2.position.set(0, 0.1, 0.24);
+      root.add(l1, l2);
+      return {
+        root, update(t) {
+          earth.rotation.y = t * 1.5;
+          const b = t * 0.8;
+          moon.position.set(Math.cos(b) * 0.38, 0.1, -Math.sin(b) * 0.17);
+          moon.rotation.y = b;
+          mSpin.position.copy(moon.position).add(V(0, 0.07, 0));
+        },
+      };
+    },
+  },
+
   // #7 s.32 Dunya ile Ay arasindaki uzaklik
   {
     mark: 7, page: 32, title: 'Dünya ile Ay Arasındaki Uzaklık',

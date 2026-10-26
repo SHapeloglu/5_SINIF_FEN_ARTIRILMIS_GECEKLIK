@@ -16,7 +16,24 @@ export function rng(seed) {
 }
 
 export function lambert(color, extra = {}) {
-  return new THREE.MeshLambertMaterial({ color, ...extra });
+  const { rim = true, ...rest } = extra;
+  const m = new THREE.MeshLambertMaterial({ color, ...rest });
+  if (rim) addRim(m);
+  return m;
+}
+
+/** Kenarlarda hafif soguk parlama (fresnel): modellere hacim ve "cilali" bir gorunum verir. */
+export function addRim(m, strength = 0.2) {
+  m.onBeforeCompile = (sh) => {
+    sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', `
+      #ifndef FLAT_SHADED
+      float rimF = pow(1.0 - clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0), 3.0);
+      outgoingLight += vec3(0.55, 0.72, 1.0) * rimF * ${strength.toFixed(2)};
+      #endif
+      #include <opaque_fragment>`);
+  };
+  m.customProgramCacheKey = () => 'rim' + strength;
+  return m;
 }
 
 export function basic(color, extra = {}) {
@@ -380,7 +397,9 @@ export function cutSphere(layers, surface, { labels = true, labelHeight = 0.09 }
   sg.setIndex(idx);
   surface.side = THREE.DoubleSide;
   const outer = layers[layers.length - 1];
-  g.add(info(new THREE.Mesh(sg, surface), outer.title, outer.info));
+  const surfaceMesh = info(new THREE.Mesh(sg, surface), outer.title, outer.info);
+  g.add(surfaceMesh);
+  const parts = []; // adim adim acilis: her katman sirayla yaylanarak belirir, etiketi ardindan gelir
 
   const lin = (c) => { const k = new THREE.Color().setRGB(c[0], c[1], c[2], THREE.SRGBColorSpace); return [k.r, k.g, k.b]; };
   const s2 = Math.SQRT1_2, side = [1, -1, 1, -1, 1, -1];
@@ -409,7 +428,10 @@ export function cutSphere(layers, surface, { labels = true, labelHeight = 0.09 }
     const mat = l.emissive
       ? new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide })
       : new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
-    g.add(info(new THREE.Mesh(fg, mat), l.title, l.info));
+    const layerMesh = info(new THREE.Mesh(fg, mat), l.title, l.info);
+    g.add(layerMesh);
+    const part = { mesh: layerMesh, call: null };
+    parts.push(part);
 
     if (labels) {
       const rm = (l.r0 + l.r1) / 2;
@@ -420,9 +442,22 @@ export function cutSphere(layers, surface, { labels = true, labelHeight = 0.09 }
       const co2 = callout(l.title, anchor, to, { height: labelHeight, dot });
       info(co2.label, l.title, l.info);
       g.add(co2);
+      part.call = co2;
     }
   });
   g.rotation.y = -Math.PI / 4; // kesik bolge izleyiciye baksin
+  let t0 = null;
+  surfaceMesh.onBeforeRender = () => {
+    const now = performance.now();
+    if (t0 === null) t0 = now;
+    const el = (now - t0) / 1000;
+    parts.forEach((p, i) => {
+      const k = clamp01((el - 0.5 - i * 0.55) / 0.6);
+      p.mesh.visible = k > 0;
+      p.mesh.scale.setScalar(Math.max(0.001, backOut(k)));
+      if (p.call) p.call.visible = k >= 0.85;
+    });
+  };
   return g;
 }
 
@@ -992,6 +1027,7 @@ export function particles(n = 120, color = 0xdddddd, size = 0.03) {
 /** Gecen sureye gore 0..1 arasi tekrarlayan dongu ve yumusak gecis yardimcilari. */
 export const loop = (t, period) => (t % period) / period;
 export const ease = (x) => x * x * (3 - 2 * x);
+export const backOut = (x) => 1 + 2.70158 * (x - 1) ** 3 + 1.70158 * (x - 1) ** 2;
 export const clamp01 = (x) => Math.min(1, Math.max(0, x));
 /** Dongu icinde [a,b] araliginda 0->1 yumusak gecis. */
 export const seg = (p, a, b) => ease(clamp01((p - a) / (b - a)));
